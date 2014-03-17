@@ -36,7 +36,25 @@ In pure python driver, mysql-connector-python is a bit faster than PyMySQL.
 
 ```
 mkvirtualenv mysql_drivers_test # workon mysql_drivers_test
-pip install --upgrade setuptools pip
+pip install --upgrade setuptools pip cython
 pip install -r requirements.txt
+git clone https://github.com/CMGS/greenify
+cd greenify
+cmake -G 'Unix Makefiles' -D CMAKE_INSTALL_PREFIX=$VIRTUAL_ENV CMakeLists.txt
+make & make install # Do we need this?
+cd ..
+export LIBGREENIFY_PREFIX=$VIRTUAL_ENV
+pip install git+git://github.com/CMGS/greenify.git#egg=greenify # if you are using zsh, use \#egg=greenify
+git clone https://github.com/CMGS/mysql-connector-c
+cd mysql-connector-c
+cmake -G 'Unix Makefiles' -D GREENIFY_INCLUDE_DIR=`echo $VIRTUAL_ENV/include` -D GREENIFY_LIB_DIR=`echo $VIRTUAL_ENV/lib` -D WITH_GREENIFY=1 -D CMAKE_INSTALL_PREFIX='$VIRTUAL_ENV' CMakeLists.txt
+make & make install # Do we need this?
+cd ..
+git clone https://github.com/CMGS/MySQL-python.git
+cd MySQL-python
+export LIBRARY_DIRS=/Users/tin/workspace/gree/growthandrevenue/sqlalchemy-gevent-mysql-drivers-comparison/mysql-connector-c/libmysql
+export INCLUDE_DIRS=/Users/tin/workspace/gree/growthandrevenue/sqlalchemy-gevent-mysql-drivers-comparison/mysql-connector-c/include
+python setup.py install
+cd ..
 python mysql_drivers_comparison.py
 ```
