@@ -27,7 +27,7 @@ def visit_mysql(db, item_id):
         tran.commit()
         conn.execute("select id, name, test_id, expires_at, created_at, updated_at, bool_prop, "
                       "type from tests").fetchall()
-        # conn.execute("select sleep(0.5)")
+        conn.execute("select sleep(0.5)")
     except:
         tran.rollback()
         logging.exception("visit mysql")
