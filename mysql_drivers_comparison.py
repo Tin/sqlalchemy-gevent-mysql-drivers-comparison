@@ -1,3 +1,4 @@
+import greenify;greenify.greenify()
 from gevent import monkey;monkey.patch_all()
 from sqlalchemy import create_engine
 from gevent.pool import Pool
@@ -5,8 +6,8 @@ import time
 import logging
 
 
-total_transactions = 1000
-concurrency = 100
+total_transactions = 100
+concurrency = 20
 
 
 def visit_mysql(db, item_id):
