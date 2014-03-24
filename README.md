@@ -6,9 +6,15 @@ Compare different mysql drivers working with SQLAlchemy and gevent, see if they 
 The main purpose of this test is to find which mysql driver has best concurrency performance when we use SQLAlchemy and gevent together.
 So we won't test umysql, which isn't compatible with DBAPI 2.0.
 
-## Result example
+## Verdict
 
-### 100 sessions, 20 concurrency, each session take 0.5 seconds (by `select sleep`)
+- Pure c version mysql driver has best performance in low concurrency scenario. It's about 2x to 2.5x faster than pure python version. Oursql is the fatest in this category.
+- Pure python mysql driver support gevent patch without any hack. And they brings same level of concurrency performance with gevent. PyMySQL has a consistent codebase and good community polularity at pure python mysql driver category. mysql-connector-python has better score, but the pypi package has some problem, so we will won't use it for now. PyMySQL is our choice this time.
+- greenify patched MySQLdb (the official native c mysql driver) gives best overall concurrency and absolute performance, but it has a complicated compile process, and we need to rely on a fork of official MySQLdb codebase which is not stable over time.
+
+## Result
+
+### 100 sessions, 20 concurrency, each session take 0.5 seconds (by `select sleep`), simulate high concurrency scenario
 
 ```
 mysql://root:@localhost:3306/mysql_drivers_test total 100 (20) 50.5239 seconds
@@ -29,7 +35,7 @@ mysql+mysqlconnector://root:@localhost:3306/mysql_drivers_test total 100 (20) 2.
 Pure python driver support gevent's monkey patch, so they support cooperative multitasking using coroutines.
 That means the main thread won't be block by MySQL calls when you use PyMySQL or mysql-connector-python.
 
-### 1000 sessions, 100 concurrency, each session only have 1 insert and 1 select
+### 1000 sessions, 100 concurrency, each session only have 1 insert and 1 select, simulate high throughput low concurrency scenario
 
 ```
 mysql://root:@localhost:3306/mysql_drivers_test total 1000 (100) 10.1098 seconds
@@ -42,7 +48,7 @@ Oursql is faster than MySQLdb in this case.
 In pure python driver, mysql-connector-python is a bit faster than PyMySQL.
 use greenify or not won't affect the testing result in this user scenario.
 
-## Setup
+## How to setup greenify
 
 ```
 mkvirtualenv mysql_drivers_test # workon mysql_drivers_test
